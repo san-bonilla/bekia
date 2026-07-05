@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MODULR — Modular Office Systems</title>
+<style>
+  /* ============================================================
+     DESIGN TOKENS
+     Palette : near-black canvas, off-white type, single steel accent
+     Type    : condensed grotesque display + neutral sans body
+     Layout  : full-height snap panels, 50/50 vertical split mixed
+     ============================================================ */
+  :root{
+    --ink:#0a0a0a;
+    --paper:#f5f5f3;
+    --paper-dim:#a8a8a4;
+    --steel:#7c8a99;
+    --line:rgba(245,245,243,.16);
+    --overlay:linear-gradient(180deg,rgba(0,0,0,.15) 0%,rgba(0,0,0,.55) 100%);
+    --display:"Arial Narrow","Helvetica Neue",sans-serif;
+    --body:"Helvetica Neue",Helvetica,Arial,sans-serif;
+    --tracking:.18em;
+  }
+
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    background:var(--ink);
+    color:var(--paper);
+    font-family:var(--body);
+    -webkit-font-smoothing:antialiased;
+    overflow:hidden;
+  }
+  img,video{display:block;width:100%;height:100%;object-fit:cover}
+
+  /* ---------- TIKTOK-STYLE SNAP SCROLLER ---------- */
+  .scroller{
+    height:100svh;
+    overflow-y:scroll;
+    scroll-snap-type:y mandatory;
+    -webkit-overflow-scrolling:touch;
+    scrollbar-width:none;
+  }
+  .scroller::-webkit-scrollbar{display:none}
+  .panel{
+    height:100svh;
+    scroll-snap-align:start;
+    scroll-snap-stop:always;   /* forces one swipe = one section */
+    position:relative;
+    overflow:hidden;
+    display:flex;
+    flex-direction:column;
+  }
+
+  /* placeholder media blocks (swap with real <video>/<img>) */
+  .media{
+    position:relative;
+    background:
+      repeating-linear-gradient(45deg,#1a1a1a 0 2px,transparent 2px 22px),
+      linear-gradient(135deg,#202020,#101010);
+    display:flex;align-items:center;justify-content:center;
+    color:var(--paper-dim);
+    font-family:var(--display);
+    letter-spacing:var(--tracking);
+    text-transform:uppercase;font-size:.7rem;
+    overflow:hidden;
+  }
+  .media::after{
+    content:attr(data-label);
+    border:1px solid var(--line);
+    padding:.55em 1em;border-radius:2px;
+    background:rgba(0,0,0,.3);
+    text-align:center;
+  }
+
+  .display{
+    font-family:var(--display);
+    font-weight:700;
+    text-transform:uppercase;
+    letter-spacing:.04em;
+    line-height:.92;
+  }
+  .eyebrow{
+    font-family:var(--display);
+    text-transform:uppercase;
+    letter-spacing:var(--tracking);
+    font-size:.72rem;
+    color:var(--steel);
+  }
+  .lede{color:var(--paper-dim);font-size:.95rem;line-height:1.55;font-weight:300}
+
+  /* ---------- HERO ---------- */
+  .hero .media{position:absolute;inset:0}
+  .hero .overlay{
+    position:absolute;inset:0;
+    background:var(--overlay);
+    display:flex;flex-direction:column;
+    justify-content:flex-end;align-items:center;
+    padding:0 1.25rem 9svh;text-align:center;z-index:2;
+  }
+  .hero h1{font-size:clamp(3rem,18vw,6rem)}
+  .hero .eyebrow{margin-bottom:.75rem}
+  .hero .sub{margin-top:.6rem;font-size:.9rem;color:var(--paper-dim);letter-spacing:.04em}
+  .scrollcue{
+    position:absolute;bottom:2.4svh;left:50%;transform:translateX(-50%);
+    width:1px;height:34px;background:var(--paper);opacity:.5;z-index:3;
+    animation:cue 2s ease-in-out infinite;
+  }
+  @keyframes cue{0%,100%{opacity:.15;height:18px}50%{opacity:.6;height:34px}}
+
+  /* ---------- CAROUSEL (full-height) ---------- */
+  .carousel{justify-content:center}
+  .carousel .head{padding:0 1.25rem;margin-bottom:1.25rem;flex:0 0 auto}
+  .carousel h2{font-size:clamp(2rem,11vw,3rem);margin-top:.5rem}
+  .track{
+    display:flex;gap:.9rem;overflow-x:auto;
+    scroll-snap-type:x mandatory;
+    padding:0 1.25rem .75rem;
+    -ms-overflow-style:none;scrollbar-width:none;
+    flex:0 0 auto;
+  }
+  .track::-webkit-scrollbar{display:none}
+  .card{
+    flex:0 0 80%;scroll-snap-align:center;
+    border:1px solid var(--line);border-radius:4px;overflow:hidden;
+    background:#0e0e0e;display:flex;flex-direction:column;
+  }
+  .card .media{flex:1 1 auto;min-height:0}
+  .card .body{padding:1.1rem 1.15rem 1.4rem;flex:0 0 auto}
+  .card .idx{font-family:var(--display);color:var(--steel);font-size:.8rem;letter-spacing:var(--tracking)}
+  .card h3{font-family:var(--display);text-transform:uppercase;font-size:1.4rem;margin:.35rem 0 .5rem;letter-spacing:.03em}
+  .card p{font-size:.85rem;line-height:1.5;color:var(--paper-dim);font-weight:300}
+  /* the cards row gets a tall fixed height inside the panel */
+  .carousel .track{height:62svh}
+  .dots{display:flex;gap:.4rem;justify-content:center;margin-top:.9rem;flex:0 0 auto}
+  .dot{width:6px;height:6px;border-radius:50%;background:var(--line)}
+
+  /* ---------- BIG MIXED (50/50 vertical split) ---------- */
+  .bigmix .media{flex:1 1 55%;min-height:0}
+  .bigmix .copy{flex:0 0 auto;padding:1.75rem 1.25rem;display:flex;flex-direction:column;justify-content:center}
+  .bigmix h2{font-size:clamp(2rem,12vw,3.2rem);margin:.5rem 0 .9rem}
+  .bigmix .sub{font-family:var(--display);text-transform:uppercase;letter-spacing:var(--tracking);font-size:.95rem;color:var(--paper);margin-bottom:.55rem}
+
+  /* ---------- SPECS (full-height) ---------- */
+  .specs{padding:0 1.25rem;justify-content:center}
+  .specs .thumb{height:25svh;border-radius:4px;overflow:hidden;margin-bottom:1.5rem;flex:0 0 auto}
+  .specs h2{font-size:clamp(1.8rem,10vw,2.8rem);margin:.4rem 0 1.2rem;flex:0 0 auto}
+  .spectable{border-top:1px solid var(--line);overflow-y:auto;flex:0 1 auto;scrollbar-width:none}
+  .spectable::-webkit-scrollbar{display:none}
+  .specrow{
+    display:grid;grid-template-columns:1fr auto;gap:1rem;
+    padding:.85rem 0;border-bottom:1px solid var(--line);align-items:baseline;
+  }
+  .spectable .specrow .spec{font-size:.78rem;letter-spacing:var(--tracking);text-transform:uppercase;color:var(--paper-dim);font-family:var(--display)}
+  .spectable .specrow .val{font-family:var(--display);font-size:1.3rem;letter-spacing:.02em;text-align:right}
+  .spectable .specrow .val small{display:block;font-size:.68rem;letter-spacing:var(--tracking);color:var(--steel);text-transform:uppercase;margin-top:.15rem}
+
+  /* ---------- FULL-SCREEN VIDEO ---------- */
+  .fullmedia .media{flex:1 1 auto}
+
+  /* ---------- CTA ---------- */
+  .cta .media{position:absolute;inset:0}
+  .cta .overlay{
+    position:absolute;inset:0;background:var(--overlay);
+    display:flex;flex-direction:column;justify-content:center;align-items:center;
+    text-align:center;padding:0 1.5rem;z-index:2;gap:1.3rem;
+  }
+  .cta h2{font-size:clamp(2.4rem,14vw,4rem)}
+  .cta p{max-width:30ch}
+  .wa-btn{
+    display:inline-flex;align-items:center;gap:.65rem;
+    background:var(--paper);color:var(--ink);
+    font-family:var(--display);text-transform:uppercase;
+    letter-spacing:var(--tracking);font-size:.85rem;font-weight:700;
+    padding:1rem 2rem;border-radius:3px;text-decoration:none;
+    transition:transform .2s ease;
+  }
+  .wa-btn:hover{transform:translateY(-2px)}
+  .wa-btn svg{width:18px;height:18px}
+
+  @media (prefers-reduced-motion:reduce){.scrollcue{animation:none}}
+
+  @media (min-width:760px){
+    .card{flex-basis:38%}
+  }
+</style>
+</head>
+<body>
+
+<div class="scroller">
+
+  <!-- ============ 1 · HERO ============ -->
+  <section class="panel hero">
+    <div class="media" data-label="HERO · full-screen video / multimedia">
+      <!-- <video autoplay muted loop playsinline poster="hero-poster.jpg">
+        <source src="hero.mp4" type="video/mp4"></video> -->
+    </div>
+    <div class="overlay">
+      <span class="eyebrow">Modular Office Systems</span>
+      <h1 class="display">MODULR</h1>
+      <p class="sub">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+    </div>
+    <span class="scrollcue"></span>
+  </section>
+
+  <!-- ============ 2 · MIXED CAROUSEL ============ -->
+  <section class="panel carousel">
+    <div class="head">
+      <span class="eyebrow">Built in pieces</span>
+      <h2 class="display">Configure it</h2>
+    </div>
+    <div class="track" data-track>
+      <article class="card">
+        <div class="media" data-label="Item 1 · image / GIF"></div>
+        <div class="body"><span class="idx">01</span><h3>Module One</h3>
+          <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor.</p></div>
+      </article>
+      <article class="card">
+        <div class="media" data-label="Item 2 · image / GIF"></div>
+        <div class="body"><span class="idx">02</span><h3>Module Two</h3>
+          <p>Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi.</p></div>
+      </article>
+      <article class="card">
+        <div class="media" data-label="Item 3 · image / GIF"></div>
+        <div class="body"><span class="idx">03</span><h3>Module Three</h3>
+          <p>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum.</p></div>
+      </article>
+    </div>
+    <div class="dots"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+  </section>
+
+  <!-- ============ 3 · BIG MIXED ============ -->
+  <section class="panel bigmix">
+    <div class="media" data-label="Big section · full-width video / multimedia"></div>
+    <div class="copy">
+      <span class="eyebrow">Section title</span>
+      <h2 class="display">One desk,<br>endless layouts</h2>
+      <p class="sub">A subtitle that frames the idea</p>
+      <p class="lede">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+    </div>
+  </section>
+
+  <!-- ============ 4 · MIXED CAROUSEL ============ -->
+  <section class="panel carousel">
+    <div class="head">
+      <span class="eyebrow">Pick your finish</span>
+      <h2 class="display">Mix & match</h2>
+    </div>
+    <div class="track" data-track>
+      <article class="card">
+        <div class="media" data-label="Item 1 · image / GIF"></div>
+        <div class="body"><span class="idx">01</span><h3>Finish One</h3>
+          <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor.</p></div>
+      </article>
+      <article class="card">
+        <div class="media" data-label="Item 2 · image / GIF"></div>
+        <div class="body"><span class="idx">02</span><h3>Finish Two</h3>
+          <p>Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi.</p></div>
+      </article>
+      <article class="card">
+        <div class="media" data-label="Item 3 · image / GIF"></div>
+        <div class="body"><span class="idx">03</span><h3>Finish Three</h3>
+          <p>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum.</p></div>
+      </article>
+    </div>
+    <div class="dots"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+  </section>
+
+  <!-- ============ 5 · SPECS ============ -->
+  <section class="panel specs">
+    <div class="media thumb" data-label="Spec image · ~25% viewport"></div>
+    <span class="eyebrow">The numbers</span>
+    <h2 class="display">Specifications</h2>
+    <div class="spectable">
+      <div class="specrow"><span class="spec">Footprint</span><span class="val">1.4 m²<small>per module</small></span></div>
+      <div class="specrow"><span class="spec">Seating</span><span class="val">6<small>people</small></span></div>
+      <div class="specrow"><span class="spec">Assembly time</span><span class="val">12<small>minutes</small></span></div>
+      <div class="specrow"><span class="spec">Materials</span><span class="val">Steel<small>+ oak</small></span></div>
+      <div class="specrow"><span class="spec">Load rating</span><span class="val">120<small>kg / shelf</small></span></div>
+      <div class="specrow"><span class="spec">Acoustic rating</span><span class="val">28<small>dB reduction</small></span></div>
+    </div>
+  </section>
+
+  <!-- ============ 6 · FULL-SCREEN VIDEO ============ -->
+  <section class="panel fullmedia">
+    <div class="media" data-label="Full-screen video">
+      <!-- <video autoplay muted loop playsinline><source src="loop.mp4" type="video/mp4"></video> -->
+    </div>
+  </section>
+
+  <!-- ============ 7 · BIG MIXED ============ -->
+  <section class="panel bigmix">
+    <div class="media" data-label="Big section · full-width video / multimedia"></div>
+    <div class="copy">
+      <span class="eyebrow">Section title</span>
+      <h2 class="display">Grows with<br>your team</h2>
+      <p class="sub">A second framing subtitle</p>
+      <p class="lede">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+    </div>
+  </section>
+
+  <!-- ============ 8 · CTA ============ -->
+  <section class="panel cta">
+    <div class="media" data-label="CTA · full-screen video / image"></div>
+    <div class="overlay">
+      <span class="eyebrow">Ready when you are</span>
+      <h2 class="display">Let's build<br>your space</h2>
+      <p class="lede">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+      <!-- Replace number (country code + digits, no +) and prefilled text -->
+      <a class="wa-btn" href="https://wa.me/5215555555555?text=Hi%20MODULR%2C%20I'd%20like%20to%20know%20more"
+         target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M.06 24l1.69-6.16a11.87 11.87 0 01-1.6-5.96C.15 5.32 5.5 0 12.06 0a11.8 11.8 0 018.4 3.49 11.76 11.76 0 013.48 8.38c0 6.55-5.35 11.88-11.92 11.88a12 12 0 01-5.7-1.45L.06 24zm6.6-3.8c1.68.99 3.28 1.58 5.4 1.58 5.45 0 9.9-4.43 9.9-9.88a9.8 9.8 0 00-2.9-7 9.78 9.78 0 00-6.99-2.9c-5.46 0-9.9 4.43-9.9 9.88 0 2.23.65 3.9 1.74 5.65l-1 3.64 3.75-.97zm11.39-5.55c-.07-.12-.27-.2-.57-.35-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.17-.17.2-.35.22-.64.07-.3-.15-1.25-.46-2.38-1.47-.88-.78-1.47-1.75-1.64-2.05-.17-.3-.02-.46.13-.6.13-.14.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.08-.15-.67-1.6-.92-2.2-.24-.58-.49-.5-.67-.5l-.57-.01c-.2 0-.52.07-.8.37-.27.3-1.04 1.02-1.04 2.47 0 1.46 1.07 2.87 1.22 3.07.15.2 2.1 3.2 5.08 4.49.71.3 1.26.49 1.69.62.71.23 1.36.2 1.87.12.57-.08 1.76-.72 2-1.41.25-.7.25-1.29.18-1.41z"/></svg>
+        Chat on WhatsApp
+      </a>
+    </div>
+  </section>
+
+</div>
+
+<script>
+  // sync each carousel's dots with its own horizontal scroll
+  document.querySelectorAll('[data-track]').forEach(track => {
+    const dots = track.parentElement.querySelectorAll('.dot');
+    const cards = track.querySelectorAll('.card');
+    if (dots[0]) dots[0].style.background = 'var(--paper)';
+    track.addEventListener('scroll', () => {
+      const i = Math.round(track.scrollLeft / cards[0].offsetWidth);
+      dots.forEach((d,n)=>d.style.background = n===i ? 'var(--paper)' : 'var(--line)');
+    });
+  });
+</script>
+</body>
+</html>
