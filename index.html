@@ -17,7 +17,7 @@
     --paper-dim:#a8a8a4;
     --steel:#7c8a99;
     --line:rgba(245,245,243,.16);
-    --overlay:linear-gradient(180deg,rgba(0,0,0,.15) 0%,rgba(0,0,0,.55) 100%);
+    --overlay:linear-gradient(180deg,rgba(0,0,0,.05) 0%,rgba(0,0,0,.12) 45%,rgba(0,0,0,.5) 78%,rgba(0,0,0,.82) 100%);
     --display:"Arial Narrow","Helvetica Neue",sans-serif;
     --body:"Helvetica Neue",Helvetica,Arial,sans-serif;
     --tracking:.18em;
@@ -93,6 +93,7 @@
 
   /* ---------- HERO ---------- */
   .hero .media{position:absolute;inset:0}
+  .hero .media img{filter:brightness(1.22) contrast(1.08) saturate(1.08)}
   .hero .overlay{
     position:absolute;inset:0;
     background:var(--overlay);
@@ -100,9 +101,9 @@
     justify-content:flex-end;align-items:center;
     padding:0 1.25rem 9svh;text-align:center;z-index:2;
   }
-  .hero h1{font-size:clamp(3rem,18vw,6rem)}
-  .hero .eyebrow{margin-bottom:.75rem}
-  .hero .sub{margin-top:.6rem;font-size:.9rem;color:var(--paper-dim);letter-spacing:.04em}
+  .hero h1{font-size:clamp(3rem,18vw,6rem);text-shadow:0 4px 24px rgba(0,0,0,.5)}
+  .hero .eyebrow{margin-bottom:.75rem;text-shadow:0 2px 10px rgba(0,0,0,.5)}
+  .hero .sub{margin-top:.6rem;font-size:.9rem;color:var(--paper-dim);letter-spacing:.04em;text-shadow:0 2px 10px rgba(0,0,0,.5)}
   .scrollcue{
     position:absolute;bottom:2.4svh;left:50%;transform:translateX(-50%);
     width:1px;height:34px;background:var(--paper);opacity:.5;z-index:3;
