@@ -33,6 +33,7 @@
     overflow:hidden;
   }
   img,video{display:block;width:100%;height:100%;object-fit:cover}
+  picture{display:block;width:100%;height:100%}
 
   /* ---------- TIKTOK-STYLE SNAP SCROLLER ---------- */
   .scroller{
@@ -66,7 +67,7 @@
     text-transform:uppercase;font-size:.7rem;
     overflow:hidden;
   }
-  .media::after{
+  .media[data-label]::after{
     content:attr(data-label);
     border:1px solid var(--line);
     padding:.55em 1em;border-radius:2px;
@@ -192,9 +193,12 @@
 
   <!-- ============ 1 · HERO ============ -->
   <section class="panel hero">
-    <div class="media" data-label="HERO · full-screen video / multimedia">
-      <!-- <video autoplay muted loop playsinline poster="hero-poster.jpg">
-        <source src="hero.mp4" type="video/mp4"></video> -->
+    <div class="media">
+      <picture>
+        <!-- Desktop hero: uncomment when media/hero_desktop.png is ready -->
+        <!-- <source media="(min-width: 760px)" srcset="media/hero_desktop.png"> -->
+        <img src="media/hero_mobile.png" alt="Bekia modular office cabin alone in a highland meadow at dusk, warm light glowing from its window">
+      </picture>
     </div>
     <div class="overlay">
       <span class="eyebrow">Modular Office Systems</span>
