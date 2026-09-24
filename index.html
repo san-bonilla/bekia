@@ -1,9 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MODULR — Modular Office Systems</title>
+<title>Bekia — Oficinas móviles de obra</title>
+<meta name="description" content="Oficina de obra sobre remolque: aislada, climatizada y con cerradura, lista para trabajar. Tu centro de control en cada obra.">
 <style>
   /* ============================================================
      DESIGN TOKENS
@@ -21,6 +22,7 @@
     --display:"Arial Narrow","Helvetica Neue",sans-serif;
     --body:"Helvetica Neue",Helvetica,Arial,sans-serif;
     --tracking:.18em;
+    --fab-clear:5rem; /* reserved bottom-right clearance so copy never sits under .wa-fab */
   }
 
   *{margin:0;padding:0;box-sizing:border-box}
@@ -112,19 +114,21 @@
   @keyframes cue{0%,100%{opacity:.15;height:18px}50%{opacity:.6;height:34px}}
 
   /* ---------- CAROUSEL (full-height) ---------- */
-  .carousel{justify-content:center}
+  .carousel{justify-content:center;padding-bottom:var(--fab-clear)}
   .carousel .head{padding:0 1.25rem;margin-bottom:1.25rem;flex:0 0 auto}
   .carousel h2{font-size:clamp(2rem,11vw,3rem);margin-top:.5rem}
+  .track-wrap{position:relative}
   .track{
     display:flex;gap:.9rem;overflow-x:auto;
     scroll-snap-type:x mandatory;
+    scroll-behavior:smooth;
     padding:0 1.25rem .75rem;
     -ms-overflow-style:none;scrollbar-width:none;
     flex:0 0 auto;
   }
   .track::-webkit-scrollbar{display:none}
   .card{
-    flex:0 0 80%;scroll-snap-align:center;
+    flex:0 0 80%;scroll-snap-align:center;scroll-snap-stop:always;
     border:1px solid var(--line);border-radius:4px;overflow:hidden;
     background:#0e0e0e;display:flex;flex-direction:column;
   }
@@ -136,30 +140,52 @@
   /* the cards row gets a tall fixed height inside the panel */
   .carousel .track{height:62svh}
   .dots{display:flex;gap:.4rem;justify-content:center;margin-top:.9rem;flex:0 0 auto}
-  .dot{width:6px;height:6px;border-radius:50%;background:var(--line)}
+  .dot{width:6px;height:6px;border-radius:50%;background:var(--line);cursor:pointer;position:relative}
+  .dot::after{content:"";position:absolute;inset:-8px}
+  .arrow{
+    display:none;
+    position:absolute;top:50%;transform:translateY(-50%);
+    width:2.75rem;height:2.75rem;border-radius:50%;
+    align-items:center;justify-content:center;
+    background:rgba(10,10,10,.55);border:1px solid var(--line);
+    color:var(--paper);cursor:pointer;z-index:2;padding:0;
+    transition:background .2s ease,opacity .2s ease;
+  }
+  .arrow:hover{background:rgba(10,10,10,.85)}
+  .arrow:disabled{background:rgba(10,10,10,.3);opacity:.55;cursor:default;pointer-events:none}
+  .arrow.prev{left:.5rem}
+  .arrow.next{right:.5rem}
+  .arrow svg{width:20px;height:20px;display:block}
 
   /* ---------- BIG MIXED (50/50 vertical split) ---------- */
   .bigmix .media{flex:1 1 55%;min-height:0}
-  .bigmix .copy{flex:0 0 auto;padding:1.75rem 1.25rem;display:flex;flex-direction:column;justify-content:center}
+  .bigmix video{object-fit:contain;background:var(--ink)}
+  .bigmix .copy{flex:0 0 auto;padding:1.75rem 1.25rem;padding-bottom:var(--fab-clear);display:flex;flex-direction:column;justify-content:center}
   .bigmix h2{font-size:clamp(2rem,12vw,3.2rem);margin:.5rem 0 .9rem}
   .bigmix .sub{font-family:var(--display);text-transform:uppercase;letter-spacing:var(--tracking);font-size:.95rem;color:var(--paper);margin-bottom:.55rem}
 
   /* ---------- SPECS (full-height) ---------- */
-  .specs{padding:0 1.25rem;justify-content:center}
+  .specs{padding:0 1.25rem;padding-bottom:var(--fab-clear);justify-content:center}
   .specs .thumb{height:25svh;border-radius:4px;overflow:hidden;margin-bottom:1.5rem;flex:0 0 auto}
   .specs h2{font-size:clamp(1.8rem,10vw,2.8rem);margin:.4rem 0 1.2rem;flex:0 0 auto}
   .spectable{border-top:1px solid var(--line);overflow-y:auto;flex:0 1 auto;scrollbar-width:none}
   .spectable::-webkit-scrollbar{display:none}
-  .specrow{
-    display:grid;grid-template-columns:1fr auto;gap:1rem;
-    padding:.85rem 0;border-bottom:1px solid var(--line);align-items:baseline;
+  .spec-group{
+    font-family:var(--display);text-transform:uppercase;letter-spacing:var(--tracking);
+    font-size:.72rem;color:var(--steel);padding:1rem 0 .35rem;
   }
-  .spectable .specrow .spec{font-size:.78rem;letter-spacing:var(--tracking);text-transform:uppercase;color:var(--paper-dim);font-family:var(--display)}
-  .spectable .specrow .val{font-family:var(--display);font-size:1.3rem;letter-spacing:.02em;text-align:right}
-  .spectable .specrow .val small{display:block;font-size:.68rem;letter-spacing:var(--tracking);color:var(--steel);text-transform:uppercase;margin-top:.15rem}
+  .spec-group:first-child{padding-top:.75rem}
+  .specrow{
+    display:flex;gap:.75rem;align-items:baseline;
+    padding:.85rem 0;border-bottom:1px solid var(--line);
+  }
+  .spectable .specrow .spec{flex:1 1 auto;min-width:0;font-size:.78rem;letter-spacing:var(--tracking);text-transform:uppercase;color:var(--paper-dim);font-family:var(--display)}
+  .spectable .specrow .val{flex:0 0 auto;font-family:var(--display);font-size:1.3rem;letter-spacing:.02em;text-align:right}
+  .spectable .specrow .val small{display:block;font-size:.68rem;letter-spacing:.06em;color:var(--steel);text-transform:none;margin-top:.15rem;font-family:var(--body);font-weight:300}
 
   /* ---------- FULL-SCREEN VIDEO ---------- */
   .fullmedia .media{flex:1 1 auto}
+  .fullmedia video{object-fit:contain;background:var(--ink)}
 
   /* ---------- CTA ---------- */
   .cta .media{position:absolute;inset:0}
@@ -180,11 +206,33 @@
   }
   .wa-btn:hover{transform:translateY(-2px)}
   .wa-btn svg{width:18px;height:18px}
+  .wa-fab{
+    position:fixed;right:1rem;bottom:calc(1rem + env(safe-area-inset-bottom));z-index:60;
+    width:54px;height:54px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    background:var(--paper);color:var(--ink);
+    box-shadow:0 6px 20px rgba(0,0,0,.35);
+    opacity:0;visibility:hidden;transform:translateY(12px) scale(.92);
+    transition:opacity .3s,transform .3s,visibility .3s;
+  }
+  .wa-fab.show{opacity:1;visibility:visible;transform:none}
+  .wa-fab:hover{transform:translateY(-2px)}
+  .wa-fab svg{width:26px;height:26px}
+  .ficha-btn{
+    align-self:flex-start;margin-top:1.1rem;flex:0 0 auto;
+    display:inline-flex;align-items:center;gap:.5rem;
+    padding:.7rem 1.1rem;border:1px solid var(--line);border-radius:4px;
+    color:var(--paper);font-family:var(--display);text-transform:uppercase;
+    letter-spacing:var(--tracking);font-size:.72rem;text-decoration:none;
+    transition:border-color .2s,transform .2s;
+  }
+  .ficha-btn:hover{border-color:var(--paper);transform:translateY(-2px)}
 
   @media (prefers-reduced-motion:reduce){.scrollcue{animation:none}}
 
   @media (min-width:760px){
     .card{flex-basis:38%}
+    .arrow{display:flex}
   }
 </style>
 </head>
@@ -196,12 +244,12 @@
   <section class="panel hero">
     <div class="media">
       <picture>
-        <source media="(min-width: 760px)" srcset="media/hero_desktop.jpg">
-        <img src="media/hero_mobile.png" alt="Bekia modular office cabin alone in a highland meadow at dusk, warm light glowing from its window">
+        <source media="(min-width: 760px)" srcset="media/hero_desktop_premium.jpg">
+        <img src="media/hero_mobile_premium.jpg" alt="Bekia modular office cabin alone in a highland meadow at dusk, warm light glowing from its window">
       </picture>
     </div>
     <div class="overlay">
-      <span class="eyebrow">Oficinas Modulares</span>
+      <span class="eyebrow">Oficinas de obra</span>
       <h1 class="display">BEKIA</h1>
       <p class="sub">Tu mejor trabajo necesita espacio</p>
     </div>
@@ -214,22 +262,30 @@
       <span class="eyebrow">La oficina de obra de hoy</span>
       <h2 class="display">Decidir bajo presión sale caro</h2>
     </div>
-    <div class="track" data-track>
-      <article class="card">
-        <div class="media"><img src="media/problem_card_1.jpg" alt="Persona trabajando en una laptop junto a su cama, en un estudio pequeño donde la cocina, la cama y el escritorio comparten el mismo espacio"></div>
-        <div class="body"><span class="idx">01</span><h3>Nadie te deja pensar</h3>
-          <p>Ruido, prisas y gente entrando sin avisar. Autorizas colados y pagos sin un minuto de calma.</p></div>
-      </article>
-      <article class="card">
-        <div class="media"><img src="media/problem_card_2.jpg" alt="Persona trabajando en su laptop en una mesa diminuta de una cafetería llena de gente, conectada al único enchufe disponible"></div>
-        <div class="body"><span class="idx">02</span><h3>Todo a la vista de todos</h3>
-          <p>Planos, laptops y contratos en una caseta de lámina sin cerradura. Un robo en obra te cuesta semanas.</p></div>
-      </article>
-      <article class="card">
-        <div class="media"><img src="media/problem_card_3.jpg" alt="Persona de pie en una oficina vacía en renta, con papeles en mano frente a un letrero de 'SE RENTA' en la ventana"></div>
-        <div class="body"><span class="idx">03</span><h3>Un error cuesta semanas</h3>
-          <p>Una decisión apresurada termina en demolición, retrasos y sobrecostos.</p></div>
-      </article>
+    <div class="track-wrap">
+      <div class="track" data-track>
+        <article class="card">
+          <div class="media"><img src="media/problem_card_1.jpg" alt="Supervisora de obra en una caseta provisional de lámina intentando revisar planos mientras trabajadores entran a pedirle decisiones"></div>
+          <div class="body"><span class="idx">01</span><h3>Nadie te deja pensar</h3>
+            <p>Ruido, prisas y gente entrando sin avisar. Autorizas colados y pagos sin un minuto de calma.</p></div>
+        </article>
+        <article class="card">
+          <div class="media"><img src="media/problem_card_2.jpg" alt="Interior de una caseta de obra de lámina con planos, laptop y contratos a la vista sobre un escritorio, con la puerta entreabierta sin cerradura"></div>
+          <div class="body"><span class="idx">02</span><h3>Todo a la vista de todos</h3>
+            <p>Planos, laptops y contratos en una caseta de lámina sin cerradura. Un robo en obra te cuesta semanas.</p></div>
+        </article>
+        <article class="card">
+          <div class="media"><img src="media/problem_card_3.jpg" alt="Trabajadores demoliendo con rotomartillo un colado mal hecho en la obra mientras la supervisora observa el retrabajo"></div>
+          <div class="body"><span class="idx">03</span><h3>Un error cuesta semanas</h3>
+            <p>Una decisión apresurada termina en demolición, retrasos y sobrecostos.</p></div>
+        </article>
+      </div>
+      <button class="arrow prev" type="button" aria-label="Anterior">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+      </button>
+      <button class="arrow next" type="button" aria-label="Siguiente">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+      </button>
     </div>
     <div class="dots"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
   </section>
@@ -248,91 +304,184 @@
   <!-- ============ 4 · MIXED CAROUSEL ============ -->
   <section class="panel carousel">
     <div class="head">
-      <span class="eyebrow">Pick your finish</span>
-      <h2 class="display">Mix & match</h2>
+      <span class="eyebrow">En obra</span>
+      <h2 class="display">Un módulo, varias funciones</h2>
     </div>
-    <div class="track" data-track>
-      <article class="card">
-        <div class="media" data-label="Item 1 · image / GIF"></div>
-        <div class="body"><span class="idx">01</span><h3>Finish One</h3>
-          <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor.</p></div>
-      </article>
-      <article class="card">
-        <div class="media" data-label="Item 2 · image / GIF"></div>
-        <div class="body"><span class="idx">02</span><h3>Finish Two</h3>
-          <p>Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi.</p></div>
-      </article>
-      <article class="card">
-        <div class="media" data-label="Item 3 · image / GIF"></div>
-        <div class="body"><span class="idx">03</span><h3>Finish Three</h3>
-          <p>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum.</p></div>
-      </article>
+    <div class="track-wrap">
+      <div class="track" data-track>
+        <article class="card">
+          <div class="media"><img src="media/use_case_1.jpg" alt="Supervisora de obra con casco y chaleco trabajando en escritorio dentro del módulo Bekia, revisando planos y cronograma"></div>
+          <div class="body"><span class="idx">01</span><h3>Dirección de obra</h3>
+            <p>Planos, pantallas y decisiones en un solo lugar, sin interrupciones.</p></div>
+        </article>
+        <article class="card">
+          <div class="media"><img src="media/use_case_2.jpg" alt="Equipo con casco reunido dentro del módulo Bekia acondicionado como sala de juntas, presentando una maqueta y un plano a inversionistas"></div>
+          <div class="body"><span class="idx">02</span><h3>Sala de juntas</h3>
+            <p>Recibe a clientes e inversionistas con una imagen profesional en sitio.</p></div>
+        </article>
+        <article class="card">
+          <div class="media"><img src="media/use_case_3.jpg" alt="Trabajador con casco revisando equipo y herramientas en anaqueles dentro del módulo Bekia usado como bodega segura"></div>
+          <div class="body"><span class="idx">03</span><h3>Bodega segura</h3>
+            <p>Herramienta, equipo y planos bajo llave, lejos del robo en obra.</p></div>
+        </article>
+      </div>
+      <button class="arrow prev" type="button" aria-label="Anterior">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+      </button>
+      <button class="arrow next" type="button" aria-label="Siguiente">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+      </button>
     </div>
     <div class="dots"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
   </section>
 
   <!-- ============ 5 · SPECS ============ -->
   <section class="panel specs">
-    <div class="media thumb" data-label="Spec image · ~25% viewport"></div>
-    <span class="eyebrow">The numbers</span>
-    <h2 class="display">Specifications</h2>
+    <span class="eyebrow">Los números</span>
+    <h2 class="display">Especificaciones</h2>
     <div class="spectable">
-      <div class="specrow"><span class="spec">Footprint</span><span class="val">1.4 m²<small>per module</small></span></div>
-      <div class="specrow"><span class="spec">Seating</span><span class="val">6<small>people</small></span></div>
-      <div class="specrow"><span class="spec">Assembly time</span><span class="val">12<small>minutes</small></span></div>
-      <div class="specrow"><span class="spec">Materials</span><span class="val">Steel<small>+ oak</small></span></div>
-      <div class="specrow"><span class="spec">Load rating</span><span class="val">120<small>kg / shelf</small></span></div>
-      <div class="specrow"><span class="spec">Acoustic rating</span><span class="val">28<small>dB reduction</small></span></div>
+      <div class="spec-group">Dimensiones</div>
+      <div class="specrow"><span class="spec">Medidas exteriores</span><span class="val">4.30 × 2.45 × 3.35 m<small>largo × ancho × alto</small></span></div>
+      <div class="specrow"><span class="spec">Área útil</span><span class="val">9.9 m²<small>interior · 2.25 m de alto</small></span></div>
+      <div class="specrow"><span class="spec">Capacidad</span><span class="val">4<small>personas</small></span></div>
+      <div class="specrow"><span class="spec">Peso</span><span class="val">1 ton<small>peso bruto</small></span></div>
+
+      <div class="spec-group">Construcción</div>
+      <div class="specrow"><span class="spec">Estructura</span><span class="val">Panel sándwich<small>aislado · esqueleto de acero</small></span></div>
+      <div class="specrow"><span class="spec">Aislamiento</span><span class="val">Térmico + acústico<small>poliuretano de alta densidad</small></span></div>
+      <div class="specrow"><span class="spec">Piso</span><span class="val">SPC<small>impermeable</small></span></div>
+
+      <div class="spec-group">Instalaciones</div>
+      <div class="specrow"><span class="spec">Clima</span><span class="val">Frío / calor<small>A/A incluido · 110 V</small></span></div>
+      <div class="specrow"><span class="spec">Eléctrico</span><span class="val">110 V<small>centro de carga · 4 contactos · luz LED</small></span></div>
+      <div class="specrow"><span class="spec">Movilidad</span><span class="val">Sobre remolque<small>eje reforzado · sin grúa</small></span></div>
     </div>
+    <a class="ficha-btn" href="media/Bekia_Ficha_Tecnica.pdf" target="_blank" rel="noopener">Descargar ficha técnica (PDF)</a>
   </section>
 
   <!-- ============ 6 · FULL-SCREEN VIDEO ============ -->
   <section class="panel fullmedia">
-    <div class="media" data-label="Full-screen video">
-      <!-- <video autoplay muted loop playsinline><source src="loop.mp4" type="video/mp4"></video> -->
+    <div class="media">
+      <video muted loop playsinline poster="media/s6_around_poster.jpg">
+        <source src="media/s6_around.mp4" type="video/mp4">
+      </video>
     </div>
   </section>
 
   <!-- ============ 7 · BIG MIXED ============ -->
   <section class="panel bigmix">
-    <div class="media" data-label="Big section · full-width video / multimedia"></div>
+    <div class="media">
+      <video muted playsinline loop preload="none" poster="media/s7_setup_poster.jpg">
+        <source src="media/s7_setup.mp4" type="video/mp4">
+      </video>
+    </div>
     <div class="copy">
-      <span class="eyebrow">Section title</span>
-      <h2 class="display">Grows with<br>your team</h2>
-      <p class="sub">A second framing subtitle</p>
-      <p class="lede">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+      <span class="eyebrow">El setup</span>
+      <h2 class="display">De remolque a<br>oficina en minutos</h2>
+      <p class="lede">Estructura reforzada, cerradura real y niveladores.</p>
     </div>
   </section>
 
-  <!-- ============ 8 · CTA ============ -->
+  <!-- ============ 8 · BIG MIXED ============ -->
+  <section class="panel bigmix">
+    <div class="media">
+      <video muted playsinline loop preload="none" poster="media/s7_interior_poster.jpg">
+        <source src="media/s7_interior.mp4" type="video/mp4">
+      </video>
+    </div>
+    <div class="copy">
+      <span class="eyebrow">El interior</span>
+      <h2 class="display">Así se<br>entrega</h2>
+      <p class="lede">Paneles aislados, piso, clima e instalación eléctrica — de fábrica.</p>
+    </div>
+  </section>
+
+  <!-- ============ 9 · CTA ============ -->
   <section class="panel cta">
-    <div class="media" data-label="CTA · full-screen video / image"></div>
+    <div class="media"><img src="media/la_idea_dusk.jpg" alt="Módulo Bekia en la obra al atardecer, con la luz encendida en la puerta y la ventana, listo para usarse"></div>
     <div class="overlay">
-      <span class="eyebrow">Ready when you are</span>
-      <h2 class="display">Let's build<br>your space</h2>
-      <p class="lede">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+      <h2 class="display">Menos presión<br>menos errores<br>más control</h2>
+      <p class="lede">Tu próxima obra</p>
       <!-- Replace number (country code + digits, no +) and prefilled text -->
-      <a class="wa-btn" href="https://wa.me/5215555555555?text=Hi%20MODULR%2C%20I'd%20like%20to%20know%20more"
+      <a class="wa-btn" href="https://wa.me/52XXXXXXXXXX?text=Hola%20Bekia%2C%20me%20gustar%C3%ADa%20cotizar%20una%20oficina%20de%20obra"
          target="_blank" rel="noopener">
         <svg viewBox="0 0 24 24" fill="currentColor"><path d="M.06 24l1.69-6.16a11.87 11.87 0 01-1.6-5.96C.15 5.32 5.5 0 12.06 0a11.8 11.8 0 018.4 3.49 11.76 11.76 0 013.48 8.38c0 6.55-5.35 11.88-11.92 11.88a12 12 0 01-5.7-1.45L.06 24zm6.6-3.8c1.68.99 3.28 1.58 5.4 1.58 5.45 0 9.9-4.43 9.9-9.88a9.8 9.8 0 00-2.9-7 9.78 9.78 0 00-6.99-2.9c-5.46 0-9.9 4.43-9.9 9.88 0 2.23.65 3.9 1.74 5.65l-1 3.64 3.75-.97zm11.39-5.55c-.07-.12-.27-.2-.57-.35-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.17-.17.2-.35.22-.64.07-.3-.15-1.25-.46-2.38-1.47-.88-.78-1.47-1.75-1.64-2.05-.17-.3-.02-.46.13-.6.13-.14.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.08-.15-.67-1.6-.92-2.2-.24-.58-.49-.5-.67-.5l-.57-.01c-.2 0-.52.07-.8.37-.27.3-1.04 1.02-1.04 2.47 0 1.46 1.07 2.87 1.22 3.07.15.2 2.1 3.2 5.08 4.49.71.3 1.26.49 1.69.62.71.23 1.36.2 1.87.12.57-.08 1.76-.72 2-1.41.25-.7.25-1.29.18-1.41z"/></svg>
-        Chat on WhatsApp
+        Cotiza por WhatsApp
       </a>
     </div>
   </section>
 
 </div>
 
+<a id="waFab" class="wa-fab" aria-label="Cotizar por WhatsApp"
+   href="https://wa.me/52XXXXXXXXXX?text=Hola%20Bekia%2C%20me%20gustar%C3%ADa%20cotizar%20una%20oficina%20de%20obra"
+   target="_blank" rel="noopener">
+  <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M.06 24l1.69-6.16a11.87 11.87 0 01-1.6-5.96C.15 5.32 5.5 0 12.06 0a11.8 11.8 0 018.4 3.49 11.76 11.76 0 013.48 8.38c0 6.55-5.35 11.88-11.92 11.88a12 12 0 01-5.7-1.45L.06 24zm6.6-3.8c1.68.99 3.28 1.58 5.4 1.58 5.45 0 9.9-4.43 9.9-9.88a9.8 9.8 0 00-2.9-7 9.78 9.78 0 00-6.99-2.9c-5.46 0-9.9 4.43-9.9 9.88 0 2.23.65 3.9 1.74 5.65l-1 3.64 3.75-.97zm11.39-5.55c-.07-.12-.27-.2-.57-.35-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.17-.17.2-.35.22-.64.07-.3-.15-1.25-.46-2.38-1.47-.88-.78-1.47-1.75-1.64-2.05-.17-.3-.02-.46.13-.6.13-.14.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.08-.15-.67-1.6-.92-2.2-.24-.58-.49-.5-.67-.5l-.57-.01c-.2 0-.52.07-.8.37-.27.3-1.04 1.02-1.04 2.47 0 1.46 1.07 2.87 1.22 3.07.15.2 2.1 3.2 5.08 4.49.71.3 1.26.49 1.69.62.71.23 1.36.2 1.87.12.57-.08 1.76-.72 2-1.41.25-.7.25-1.29.18-1.41z"/></svg>
+</a>
+
 <script>
-  // sync each carousel's dots with its own horizontal scroll
+  // sync each carousel's dots + arrows with its own horizontal scroll,
+  // and make dots/arrows clickable so desktop (no swipe) can navigate too
   document.querySelectorAll('[data-track]').forEach(track => {
-    const dots = track.parentElement.querySelectorAll('.dot');
+    const wrap = track.parentElement;
+    const carousel = track.closest('.carousel');
+    const dots = carousel.querySelectorAll('.dot');
     const cards = track.querySelectorAll('.card');
-    if (dots[0]) dots[0].style.background = 'var(--paper)';
-    track.addEventListener('scroll', () => {
-      const i = Math.round(track.scrollLeft / cards[0].offsetWidth);
-      dots.forEach((d,n)=>d.style.background = n===i ? 'var(--paper)' : 'var(--line)');
-    });
+    const prevBtn = wrap.querySelector('.arrow.prev');
+    const nextBtn = wrap.querySelector('.arrow.next');
+
+    const currentIndex = () => Math.round(track.scrollLeft / cards[0].offsetWidth);
+    const goTo = i => cards[Math.min(cards.length - 1, Math.max(0, i))]
+      .scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+
+    const update = () => {
+      const i = Math.min(cards.length - 1, Math.max(0, currentIndex()));
+      dots.forEach((d,n) => d.style.background = n === i ? 'var(--paper)' : 'var(--line)');
+      if (prevBtn) prevBtn.disabled = i === 0;
+      if (nextBtn) nextBtn.disabled = i === cards.length - 1;
+    };
+
+    dots.forEach((dot, i) => dot.addEventListener('click', () => goTo(i)));
+    if (prevBtn) prevBtn.addEventListener('click', () => goTo(currentIndex() - 1));
+    if (nextBtn) nextBtn.addEventListener('click', () => goTo(currentIndex() + 1));
+
+    track.addEventListener('scroll', update);
+    update();
   });
+
+  // scroll-triggered playback: play a panel's video only while its panel is in view
+  const panelVideos = document.querySelectorAll('.panel video');
+  if (panelVideos.length) {
+    const videoObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        const v = entry.target;
+        if (entry.isIntersecting) {
+          v.play().catch(() => {});
+        } else {
+          v.pause();
+        }
+      });
+    }, { threshold: .5 });
+    panelVideos.forEach(v => videoObserver.observe(v));
+  }
+
+  (function () {
+    var fab  = document.getElementById('waFab');
+    var hero = document.querySelector('.panel.hero');
+    var cta  = document.querySelector('.panel.cta');
+    if (!fab) return;
+    var heroVisible = !!hero, ctaVisible = false;
+    var show = function () { fab.classList.toggle('show', !heroVisible && !ctaVisible); };
+    if ('IntersectionObserver' in window) {
+      // explicit root: the page scrolls inside .scroller, not the document,
+      // so pin observation to that element instead of the implicit viewport root
+      var scrollerEl = document.querySelector('.scroller');
+      var opts = { root: scrollerEl || null, threshold: 0.35 };
+      if (hero) new IntersectionObserver(function (e) { heroVisible = e[0].isIntersecting; show(); }, opts).observe(hero);
+      if (cta)  new IntersectionObserver(function (e) { ctaVisible = e[0].isIntersecting; show(); }, opts).observe(cta);
+    } else { fab.classList.add('show'); }   // fallback: always visible
+    show();
+  })();
 </script>
 </body>
 </html>
