@@ -160,6 +160,13 @@
   /* ---------- BIG MIXED (50/50 vertical split) ---------- */
   .bigmix .media{flex:1 1 55%;min-height:0}
   .bigmix video{object-fit:contain;background:var(--ink)}
+  /* S7/S8 (setup + interior) video size on mobile — edit this number and reload.
+     It's a floor: the video area will be AT LEAST this tall, growing further if
+     there's spare room. Push it too high and it'll start crowding the copy text
+     below, since the two share a fixed 100svh panel. Try values between 55-75vh. */
+  @media (max-width:759px){
+    .bigmix .media-video{min-height:60vh}
+  }
   .bigmix .copy{flex:0 0 auto;padding:1.75rem 1.25rem;padding-bottom:var(--fab-clear);display:flex;flex-direction:column;justify-content:center}
   .bigmix h2{font-size:clamp(2rem,12vw,3.2rem);margin:.5rem 0 .9rem}
   .bigmix .sub{font-family:var(--display);text-transform:uppercase;letter-spacing:var(--tracking);font-size:.95rem;color:var(--paper);margin-bottom:.55rem}
@@ -370,7 +377,7 @@
 
   <!-- ============ 7 · BIG MIXED ============ -->
   <section class="panel bigmix">
-    <div class="media">
+    <div class="media media-video">
       <video muted playsinline loop preload="none" poster="media/s7_setup_poster.jpg">
         <source src="media/s7_setup.mp4" type="video/mp4">
       </video>
@@ -384,7 +391,7 @@
 
   <!-- ============ 8 · BIG MIXED ============ -->
   <section class="panel bigmix">
-    <div class="media">
+    <div class="media media-video">
       <video muted playsinline loop preload="none" poster="media/s7_interior_poster.jpg">
         <source src="media/s7_interior.mp4" type="video/mp4">
       </video>
