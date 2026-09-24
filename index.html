@@ -39,7 +39,8 @@
 
   /* ---------- TIKTOK-STYLE SNAP SCROLLER ---------- */
   .scroller{
-    height:100svh;
+    height:100vh;   /* fallback for browsers without dvh support */
+    height:100dvh;  /* tracks the real visible viewport as browser chrome shows/hides */
     overflow-y:scroll;
     scroll-snap-type:y mandatory;
     -webkit-overflow-scrolling:touch;
@@ -47,7 +48,8 @@
   }
   .scroller::-webkit-scrollbar{display:none}
   .panel{
-    height:100svh;
+    height:100vh;
+    height:100dvh;
     scroll-snap-align:start;
     scroll-snap-stop:always;   /* forces one swipe = one section */
     position:relative;
@@ -101,13 +103,17 @@
     background:var(--overlay);
     display:flex;flex-direction:column;
     justify-content:flex-end;align-items:center;
-    padding:0 1.25rem 9svh;text-align:center;z-index:2;
+    padding:0 1.25rem 9vh;
+    padding:0 1.25rem 9dvh;
+    text-align:center;z-index:2;
   }
   .hero h1{font-size:clamp(3rem,18vw,6rem);text-shadow:0 4px 24px rgba(0,0,0,.5)}
   .hero .eyebrow{margin-bottom:.75rem;text-shadow:0 2px 10px rgba(0,0,0,.5)}
   .hero .sub{margin-top:.6rem;font-size:.9rem;color:var(--paper-dim);letter-spacing:.04em;text-shadow:0 2px 10px rgba(0,0,0,.5)}
   .scrollcue{
-    position:absolute;bottom:2.4svh;left:50%;transform:translateX(-50%);
+    position:absolute;left:50%;transform:translateX(-50%);
+    bottom:2.4vh;
+    bottom:2.4dvh;
     width:1px;height:34px;background:var(--paper);opacity:.5;z-index:3;
     animation:cue 2s ease-in-out infinite;
   }
@@ -138,7 +144,7 @@
   .card h3{font-family:var(--display);text-transform:uppercase;font-size:1.4rem;margin:.35rem 0 .5rem;letter-spacing:.03em}
   .card p{font-size:.85rem;line-height:1.5;color:var(--paper-dim);font-weight:300}
   /* the cards row gets a tall fixed height inside the panel */
-  .carousel .track{height:62svh}
+  .carousel .track{height:62vh;height:62dvh}
   .dots{display:flex;gap:.4rem;justify-content:center;margin-top:.9rem;flex:0 0 auto}
   .dot{width:6px;height:6px;border-radius:50%;background:var(--line);cursor:pointer;position:relative}
   .dot::after{content:"";position:absolute;inset:-8px}
@@ -163,7 +169,7 @@
   /* S7/S8 (setup + interior) video size on mobile — edit this number and reload.
      It's a floor: the video area will be AT LEAST this tall, growing further if
      there's spare room. Push it too high and it'll start crowding the copy text
-     below, since the two share a fixed 100svh panel. Try values between 55-75vh. */
+     below, since the two share a fixed full-height panel. Try values between 55-75vh. */
   @media (max-width:759px){
     .bigmix .media-video{min-height:60vh}
   }
@@ -173,7 +179,7 @@
 
   /* ---------- SPECS (full-height) ---------- */
   .specs{padding:0 1.25rem;padding-bottom:var(--fab-clear);justify-content:center}
-  .specs .thumb{height:25svh;border-radius:4px;overflow:hidden;margin-bottom:1.5rem;flex:0 0 auto}
+  .specs .thumb{height:25vh;height:25dvh;border-radius:4px;overflow:hidden;margin-bottom:1.5rem;flex:0 0 auto}
   .specs h2{font-size:clamp(1.8rem,10vw,2.8rem);margin:.4rem 0 1.2rem;flex:0 0 auto}
   .spectable{border-top:1px solid var(--line);overflow-y:auto;flex:0 1 auto;scrollbar-width:none}
   .spectable::-webkit-scrollbar{display:none}
