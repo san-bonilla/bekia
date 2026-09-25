@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Bekia — Oficinas móviles de obra</title>
 <meta name="description" content="Oficina de obra sobre remolque: aislada, climatizada y con cerradura, lista para trabajar. Tu centro de control en cada obra.">
+<link rel="icon" type="image/png" href="media/white_logo.png">
 <style>
   /* ============================================================
      DESIGN TOKENS
@@ -107,7 +108,7 @@
     padding:0 1.25rem 9dvh;
     text-align:center;z-index:2;
   }
-  .hero h1{font-size:clamp(3rem,18vw,6rem);text-shadow:0 4px 24px rgba(0,0,0,.5)}
+  .hero-logo{width:clamp(200px,58vw,380px);height:auto;display:block;filter:drop-shadow(0 4px 24px rgba(0,0,0,.5))}
   .hero .eyebrow{margin-bottom:.75rem;text-shadow:0 2px 10px rgba(0,0,0,.5)}
   .hero .sub{margin-top:.6rem;font-size:.9rem;color:var(--paper-dim);letter-spacing:.04em;text-shadow:0 2px 10px rgba(0,0,0,.5)}
   .scrollcue{
@@ -164,7 +165,7 @@
   .arrow svg{width:20px;height:20px;display:block}
 
   /* ---------- BIG MIXED (50/50 vertical split) ---------- */
-  .bigmix .media{flex:1 1 55%;min-height:0}
+  .bigmix .media{flex:1 1 55%;min-height:0;position:relative}
   .bigmix video{object-fit:contain;background:var(--ink)}
   /* S7/S8 (setup + interior) video size on mobile — edit this number and reload.
      It's a floor: the video area will be AT LEAST this tall, growing further if
@@ -197,8 +198,19 @@
   .spectable .specrow .val small{display:block;font-size:.68rem;letter-spacing:.06em;color:var(--steel);text-transform:none;margin-top:.15rem;font-family:var(--body);font-weight:300}
 
   /* ---------- FULL-SCREEN VIDEO ---------- */
-  .fullmedia .media{flex:1 1 auto}
+  .fullmedia .media{flex:1 1 auto;position:relative}
   .fullmedia video{object-fit:contain;background:var(--ink)}
+
+  /* tap-to-play fallback: shown only when a mobile browser blocks script-triggered play() */
+  .play-fallback{
+    position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+    width:4.5rem;height:4.5rem;border-radius:50%;border:1px solid var(--line);
+    display:flex;align-items:center;justify-content:center;
+    background:rgba(10,10,10,.55);color:var(--paper);cursor:pointer;z-index:3;padding:0;
+    transition:background .2s ease,transform .2s ease;
+  }
+  .play-fallback:hover{background:rgba(10,10,10,.85);transform:translate(-50%,-50%) scale(1.05)}
+  .play-fallback svg{width:28px;height:28px;display:block}
 
   /* ---------- CTA ---------- */
   .cta .media{position:absolute;inset:0}
@@ -263,7 +275,7 @@
     </div>
     <div class="overlay">
       <span class="eyebrow">Oficinas de obra</span>
-      <h1 class="display">BEKIA</h1>
+      <h1><img class="hero-logo" src="media/white_letters_trimmed.png" alt="BEKIA"></h1>
       <p class="sub">Tu mejor trabajo necesita espacio</p>
     </div>
     <span class="scrollcue"></span>
@@ -462,20 +474,57 @@
     update();
   });
 
-  // scroll-triggered playback: play a panel's video only while its panel is in view
+  // scroll-triggered playback: play a panel's video only while its panel is in view.
+  // Some mobile browsers (data-saver mode, Safari's "Never Auto-Play" setting, some
+  // in-app browsers) block a script-triggered play() even when muted — that's a
+  // real, deliberate user/browser preference and can't be forced. Two fallbacks:
+  // 1) the first tap anywhere on the page counts as a genuine user gesture on most
+  //    browsers, so retry whatever should currently be playing at that point.
+  // 2) if a specific video still can't play, show a small tap-to-play button on it —
+  //    a direct tap on that always works, since it's an explicit user request.
   const panelVideos = document.querySelectorAll('.panel video');
   if (panelVideos.length) {
+    const shouldPlay = new Map();
+
+    const showPlayBtn = v => {
+      const media = v.closest('.media');
+      if (!media || media.querySelector('.play-fallback')) return;
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'play-fallback';
+      btn.setAttribute('aria-label', 'Reproducir video');
+      btn.innerHTML = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
+      btn.addEventListener('click', e => {
+        e.stopPropagation();
+        v.play().then(() => btn.remove()).catch(() => {});
+      });
+      media.appendChild(btn);
+    };
+
+    const tryPlay = v => {
+      const p = v.play();
+      if (p && typeof p.catch === 'function') {
+        p.then(() => v.closest('.media')?.querySelector('.play-fallback')?.remove())
+         .catch(() => showPlayBtn(v));
+      }
+    };
+
     const videoObserver = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
         const v = entry.target;
+        shouldPlay.set(v, entry.isIntersecting);
         if (entry.isIntersecting) {
-          v.play().catch(() => {});
+          tryPlay(v);
         } else {
           v.pause();
         }
       });
     }, { threshold: .5 });
     panelVideos.forEach(v => videoObserver.observe(v));
+
+    const unlock = () => panelVideos.forEach(v => { if (shouldPlay.get(v) && v.paused) tryPlay(v); });
+    document.addEventListener('touchend', unlock, { once: true, passive: true });
+    document.addEventListener('click', unlock, { once: true });
   }
 
   (function () {
