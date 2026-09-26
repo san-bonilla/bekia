@@ -49,14 +49,22 @@
   }
   .scroller::-webkit-scrollbar{display:none}
   .panel{
-    height:100vh;
-    height:100dvh;
+    height:95vh;
+    height:95dvh;
     scroll-snap-align:start;
     scroll-snap-stop:always;   /* forces one swipe = one section */
     position:relative;
     overflow:hidden;
     display:flex;
     flex-direction:column;
+  }
+  /* hero and CTA stay full-bleed; every section in between is 90% of the
+     viewport on purpose, so the next section always peeks in at the bottom —
+     a visual cue that scrolling continues past it. */
+  .panel.hero,
+  .panel.cta{
+    height:100vh;
+    height:100dvh;
   }
 
   /* placeholder media blocks (swap with real <video>/<img>) */
@@ -170,16 +178,17 @@
   /* S7/S8 (setup + interior) video size on mobile — edit this number and reload.
      It's a floor: the video area will be AT LEAST this tall, growing further if
      there's spare room. Push it too high and it'll start crowding the copy text
-     below, since the two share a fixed full-height panel. Try values between 55-75vh. */
+     below, since the two share a panel that's now 90vh tall. Try values between 45-65vh
+     (lowered 10vh from the original 55-75 range to match the shorter panel). */
   @media (max-width:759px){
-    .bigmix .media-video{min-height:60vh}
+    .bigmix .media-video{min-height:50vh}
   }
   .bigmix .copy{flex:0 0 auto;padding:1.75rem 1.25rem;padding-bottom:var(--fab-clear);display:flex;flex-direction:column;justify-content:center}
   .bigmix h2{font-size:clamp(2rem,12vw,3.2rem);margin:.5rem 0 .9rem}
   .bigmix .sub{font-family:var(--display);text-transform:uppercase;letter-spacing:var(--tracking);font-size:.95rem;color:var(--paper);margin-bottom:.55rem}
 
   /* ---------- SPECS (full-height) ---------- */
-  .specs{padding:0 1.25rem;padding-bottom:var(--fab-clear);justify-content:center}
+  .specs{padding:0 1.25rem;padding-top:1.5rem;padding-bottom:var(--fab-clear);justify-content:center}
   .specs .thumb{height:25vh;height:25dvh;border-radius:4px;overflow:hidden;margin-bottom:1.5rem;flex:0 0 auto}
   .specs h2{font-size:clamp(1.8rem,10vw,2.8rem);margin:.4rem 0 1.2rem;flex:0 0 auto}
   .spectable{border-top:1px solid var(--line);overflow-y:auto;flex:0 1 auto;scrollbar-width:none}
@@ -200,6 +209,15 @@
   /* ---------- FULL-SCREEN VIDEO ---------- */
   .fullmedia .media{flex:1 1 auto;position:relative}
   .fullmedia video{object-fit:contain;background:var(--ink)}
+  /* title pinned to the top edge so it's what shows through the peek sliver
+     under whichever panel comes before it — gives this video an identity
+     without adding a copy block that would shrink the full-bleed video. */
+  .fullmedia .overlay{
+    position:absolute;top:0;left:0;right:0;z-index:2;
+    padding:1.75rem 1.25rem;
+    background:linear-gradient(180deg,rgba(0,0,0,.5) 0%,rgba(0,0,0,0) 100%);
+  }
+  .fullmedia .eyebrow{text-shadow:0 2px 10px rgba(0,0,0,.5)}
 
   /* tap-to-play fallback: shown only when a mobile browser blocks script-triggered play() */
   .play-fallback{
@@ -360,7 +378,47 @@
     <div class="dots"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
   </section>
 
-  <!-- ============ 5 · SPECS ============ -->
+  <!-- ============ 5 · FULL-SCREEN VIDEO ============ -->
+  <section class="panel fullmedia">
+    <div class="media">
+      <video muted loop playsinline poster="media/s6_around_poster.jpg">
+        <source src="media/s6_around.mp4" type="video/mp4">
+      </video>
+    </div>
+    <div class="overlay">
+      <span class="eyebrow">El espacio</span>
+    </div>
+  </section>
+
+  <!-- ============ 6 · BIG MIXED ============ -->
+  <section class="panel bigmix">
+    <div class="media media-video">
+      <video muted playsinline loop preload="none" poster="media/s7_setup_poster.jpg">
+        <source src="media/s7_setup.mp4" type="video/mp4">
+      </video>
+    </div>
+    <div class="copy">
+      <span class="eyebrow">El setup</span>
+      <h2 class="display">De remolque a<br>oficina en minutos</h2>
+      <p class="lede">Estructura reforzada, cerradura real y niveladores.</p>
+    </div>
+  </section>
+
+  <!-- ============ 7 · BIG MIXED ============ -->
+  <section class="panel bigmix">
+    <div class="media media-video">
+      <video muted playsinline loop preload="none" poster="media/s7_interior_poster.jpg">
+        <source src="media/s7_interior.mp4" type="video/mp4">
+      </video>
+    </div>
+    <div class="copy">
+      <span class="eyebrow">El interior</span>
+      <h2 class="display">Así se<br>entrega</h2>
+      <p class="lede">Paneles aislados, piso, clima e instalación eléctrica — de fábrica.</p>
+    </div>
+  </section>
+
+  <!-- ============ 8 · SPECS ============ -->
   <section class="panel specs">
     <span class="eyebrow">Los números</span>
     <h2 class="display">Especificaciones</h2>
@@ -382,43 +440,6 @@
       <div class="specrow"><span class="spec">Movilidad</span><span class="val">Sobre remolque<small>eje reforzado · sin grúa</small></span></div>
     </div>
     <a class="ficha-btn" href="media/Bekia_Ficha_Tecnica.pdf" target="_blank" rel="noopener">Descargar ficha técnica (PDF)</a>
-  </section>
-
-  <!-- ============ 6 · FULL-SCREEN VIDEO ============ -->
-  <section class="panel fullmedia">
-    <div class="media">
-      <video muted loop playsinline poster="media/s6_around_poster.jpg">
-        <source src="media/s6_around.mp4" type="video/mp4">
-      </video>
-    </div>
-  </section>
-
-  <!-- ============ 7 · BIG MIXED ============ -->
-  <section class="panel bigmix">
-    <div class="media media-video">
-      <video muted playsinline loop preload="none" poster="media/s7_setup_poster.jpg">
-        <source src="media/s7_setup.mp4" type="video/mp4">
-      </video>
-    </div>
-    <div class="copy">
-      <span class="eyebrow">El setup</span>
-      <h2 class="display">De remolque a<br>oficina en minutos</h2>
-      <p class="lede">Estructura reforzada, cerradura real y niveladores.</p>
-    </div>
-  </section>
-
-  <!-- ============ 8 · BIG MIXED ============ -->
-  <section class="panel bigmix">
-    <div class="media media-video">
-      <video muted playsinline loop preload="none" poster="media/s7_interior_poster.jpg">
-        <source src="media/s7_interior.mp4" type="video/mp4">
-      </video>
-    </div>
-    <div class="copy">
-      <span class="eyebrow">El interior</span>
-      <h2 class="display">Así se<br>entrega</h2>
-      <p class="lede">Paneles aislados, piso, clima e instalación eléctrica — de fábrica.</p>
-    </div>
   </section>
 
   <!-- ============ 9 · CTA ============ -->
